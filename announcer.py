@@ -63,7 +63,7 @@ def load_config(path):
 
 def state_path():
     cache_home = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
-    return Path(os.environ.get("HERDR_PLUGIN_STATE_DIR") or cache_home / "herdr-audio")
+    return Path(os.environ.get("HERDR_PLUGIN_STATE_DIR") or cache_home / "herdr-8-bit-announcer")
 
 
 def number(table, key, default, low, high):
@@ -300,7 +300,12 @@ def announce(config, context, agent, state, config_file, args):
         values["agent"] = values["name"] = kind[:1].upper() + kind[1:]
     if args.workspace:
         values["workspace"] = args.workspace
-    text = phrase(config, values, kind, args.template)
+    text = getattr(args, "say", None)
+    if text is not None:
+        if not text.strip() or len(text) > 500 or any(ord(char) < 32 or ord(char) == 127 for char in text):
+            raise ValueError("speech text must be 1–500 characters without control characters")
+    else:
+        text = phrase(config, values, kind, args.template)
     if text is None:
         return
     if args.text_only:
@@ -342,12 +347,15 @@ def main(argv=None):
     parser.add_argument("--agent", help="agent kind for preview, e.g. pi")
     parser.add_argument("--workspace", help="workspace label for preview")
     parser.add_argument("--template", help="one custom phrase for preview")
+    parser.add_argument("--say", help="speak literal text, bypassing phrase selection and mute rules")
     parser.add_argument("--text-only", action="store_true", help="print the phrase without generating audio")
     parser.add_argument("--no-play", action="store_true", help="generate a clip without playing it")
     parser.add_argument("--output", type=Path, help="also save the generated WAV at this path")
     args = parser.parse_args(argv)
-    if args.mode == "event" and any((args.agent, args.workspace, args.template, args.text_only, args.no_play, args.output)):
+    if args.mode == "event" and any((args.agent, args.workspace, args.template, args.say is not None, args.text_only, args.no_play, args.output)):
         parser.error("preview options cannot be used in event mode")
+    if args.say is not None and args.template is not None:
+        parser.error("--say cannot be combined with --template")
     context = json.loads(os.environ.get("HERDR_PLUGIN_CONTEXT_JSON", "{}"))
     agent = None
     if args.mode == "event":
@@ -355,9 +363,11 @@ def main(argv=None):
         agent = completed_agent(event)
         if agent is None:
             return
-    elif context.get("focused_pane_id") and context.get("focused_pane_agent"):
+    elif args.say is None and context.get("focused_pane_id") and context.get("focused_pane_agent"):
         agent = get_agent(context["focused_pane_id"])
     file = config_path(args.config)
+    if args.config and not file.is_file():
+        raise FileNotFoundError(f"config not found: {file}")
     config = load_config(file)
     announce(config, context, agent, state_path(), file, args)
 
@@ -367,8 +377,8 @@ if __name__ == "__main__":
         main()
     except subprocess.CalledProcessError as error:
         detail = (error.stderr or b"").decode(errors="replace").strip()
-        print(f"herdr-audio: {error.cmd[0]} failed: {detail[:1000]}", file=sys.stderr)
+        print(f"herdr-8-bit-announcer: {error.cmd[0]} failed: {detail[:1000]}", file=sys.stderr)
         sys.exit(1)
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
-        print(f"herdr-audio: {error}", file=sys.stderr)
+        print(f"herdr-8-bit-announcer: {error}", file=sys.stderr)
         sys.exit(1)

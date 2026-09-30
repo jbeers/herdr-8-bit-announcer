@@ -1,4 +1,4 @@
-# Copy this to: $(herdr plugin config-dir jbeers.herdr-audio)/config.toml
+# Copy this to: $(herdr plugin config-dir jbeers.herdr-8-bit-announcer)/config.toml
 # Config is reread on every completion; no restart needed.
 
 # Built-in phrase packs: gauntlet, victory, snark. Picks a random phrase.

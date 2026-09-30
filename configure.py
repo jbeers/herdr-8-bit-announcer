@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Terminal settings popup for Dungeon Announcer (uses the system dialog tool)."""
+"""Terminal settings and speech popups for Herdr 8-bit Announcer."""
 
 import argparse
 import contextlib
@@ -55,7 +55,7 @@ def menu(title, text, items, default=None, cancel="Back"):
 
 
 def message(text):
-    dialog("Dungeon Announcer", "--msgbox", text, 0, 0)
+    dialog("Herdr 8-bit Announcer", "--msgbox", text, 0, 0)
 
 
 def form(title, text, fields):
@@ -222,7 +222,7 @@ def document(config):
     root = {key: value for key, value in config.items() if key not in ("voice", "effects", "rules")}
     if "rules" in config and not config["rules"]:
         root["rules"] = []
-    lines = ["# Saved by Dungeon Announcer settings.", *assignments(root)]
+    lines = ["# Saved by Herdr 8-bit Announcer settings.", *assignments(root)]
     for section in ("voice", "effects"):
         if section in config:
             lines.extend(["", f"[{section}]", *assignments(config[section])])
@@ -280,7 +280,7 @@ def settings(path):
     initial = copy.deepcopy(config)
     while True:
         pack = "custom" if "templates" in config else config.get("preset", "gauntlet")
-        choice = menu("Dungeon Announcer settings", f"{path}\nChanges are drafts until Save. Arrows/Enter: select; Esc: close.", [
+        choice = menu("Herdr 8-bit Announcer settings", f"{path}\nChanges are drafts until Save. Arrows/Enter: select; Esc: close.", [
             ("1", f"Phrase pack: {pack}"), ("2", "Custom phrases"),
             ("3", f"Agent/workspace rules ({len(config.get('rules', []))})"),
             ("4", f"Only matching rules: {'on' if config.get('only_matched', False) else 'off'}"),
@@ -329,23 +329,31 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--open", action="store_true", help="open this plugin's Herdr settings popup")
     parser.add_argument("--config", type=Path, help="edit an explicit config file in a standalone terminal")
+    parser.add_argument("--say", action="store_true", help="prompt for literal text and play it")
     args = parser.parse_args(argv)
     if args.open:
         if args.config:
             parser.error("--config cannot be combined with --open")
         herdr = os.environ.get("HERDR_BIN_PATH", "herdr")
-        audio.run([herdr, "plugin", "pane", "open", "--plugin", "jbeers.herdr-audio", "--entrypoint", "settings"])
+        audio.run([herdr, "plugin", "pane", "open", "--plugin", "jbeers.herdr-8-bit-announcer",
+                   "--entrypoint", "say" if args.say else "settings"])
         return
     if not sys.stdin.isatty():
         raise RuntimeError("Settings need an interactive terminal; use the Herdr configure action or a terminal.")
     if not shutil.which("dialog"):
         raise RuntimeError("Install dialog for the settings UI (zypper/apt/dnf install dialog; macOS: brew install dialog).")
+    if args.say:
+        text = dialog("Say something", "--inputbox", "Enter text to hear with your current voice/effects (max 500 characters).\n"
+                      "This test bypasses mute rules. OpenAI sends text to its service; charges may apply.", 0, 0)
+        if text is not None:
+            audio.main(["preview", f"--say={text}", *(["--config", str(args.config)] if args.config else [])])
+        return
     if args.config:
         path = args.config.expanduser().resolve()
     else:
         directory = os.environ.get("HERDR_PLUGIN_CONFIG_DIR")
         if not directory:
-            directory = audio.run([os.environ.get("HERDR_BIN_PATH", "herdr"), "plugin", "config-dir", "jbeers.herdr-audio"]).decode().strip()
+            directory = audio.run([os.environ.get("HERDR_BIN_PATH", "herdr"), "plugin", "config-dir", "jbeers.herdr-8-bit-announcer"]).decode().strip()
         path = (Path(directory) / "config.toml").resolve()
     settings(path)
 
@@ -356,7 +364,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         sys.exit(130)
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
-        print(f"herdr-audio settings: {error}", file=sys.stderr)
+        print(f"herdr-8-bit-announcer settings: {error}", file=sys.stderr)
         if sys.stdin.isatty():
             input("Press Enter to close.")
         sys.exit(1)

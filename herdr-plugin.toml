@@ -1,8 +1,8 @@
-id = "jbeers.herdr-audio"
-name = "Dungeon Announcer"
-version = "0.4.0"
+id = "jbeers.herdr-8-bit-announcer"
+name = "Herdr 8-bit Announcer"
+version = "0.5.0"
 min_herdr_version = "0.9.2"
-description = "Gauntlet-inspired completion announcements with custom agent/workspace phrases."
+description = "8-bit-style completion announcements with custom agent/workspace phrases."
 platforms = ["linux", "macos"]
 
 [[events]]
@@ -11,18 +11,36 @@ command = ["python3", "announcer.py", "event"]
 
 [[actions]]
 id = "preview"
-title = "Preview dungeon announcer"
+title = "Preview 8-bit announcer"
 command = ["python3", "announcer.py", "preview"]
 
 [[actions]]
 id = "configure"
-title = "Configure dungeon announcer"
+title = "Configure 8-bit announcer"
 command = ["python3", "configure.py", "--open"]
+
+[[actions]]
+id = "say"
+title = "Say something with the 8-bit announcer"
+command = ["python3", "configure.py", "--open", "--say"]
+
+[[actions]]
+id = "doctor"
+title = "Check 8-bit announcer setup"
+command = ["python3", "doctor.py"]
 
 [[panes]]
 id = "settings"
-title = "Dungeon Announcer Settings"
+title = "Herdr 8-bit Announcer Settings"
 placement = "popup"
 width = "85%"
 height = "90%"
 command = ["python3", "configure.py"]
+
+[[panes]]
+id = "say"
+title = "Say something"
+placement = "popup"
+width = "85%"
+height = "60%"
+command = ["python3", "configure.py", "--say"]
