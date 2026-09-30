@@ -1,0 +1,28 @@
+id = "jbeers.herdr-audio"
+name = "Dungeon Announcer"
+version = "0.4.0"
+min_herdr_version = "0.9.2"
+description = "Gauntlet-inspired completion announcements with custom agent/workspace phrases."
+platforms = ["linux", "macos"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["python3", "announcer.py", "event"]
+
+[[actions]]
+id = "preview"
+title = "Preview dungeon announcer"
+command = ["python3", "announcer.py", "preview"]
+
+[[actions]]
+id = "configure"
+title = "Configure dungeon announcer"
+command = ["python3", "configure.py", "--open"]
+
+[[panes]]
+id = "settings"
+title = "Dungeon Announcer Settings"
+placement = "popup"
+width = "85%"
+height = "90%"
+command = ["python3", "configure.py"]

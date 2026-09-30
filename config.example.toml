@@ -1,0 +1,63 @@
+# Copy this to: $(herdr plugin config-dir jbeers.herdr-audio)/config.toml
+# Config is reread on every completion; no restart needed.
+
+# Built-in phrase packs: gauntlet, victory, snark. Picks a random phrase.
+preset = "gauntlet"
+
+# Uncomment to replace the built-in phrases with your own.
+# Placeholders: {agent}, {workspace}, {name}, {tab}, {pane}.
+# {agent}/{name} use the agent's custom name when available, otherwise e.g. Pi.
+# Use {{ and }} for literal braces. No format specs or attribute expressions.
+# templates = [
+#   "{agent} agent in {workspace} needs food badly!",
+#   "{agent} agent in {workspace} has slain the spaghetti code monster!",
+# ]
+
+# true: announce ONLY agents matching a rule below. false: announce all agents.
+only_matched = false
+
+[voice]
+# local: offline eSpeak NG on Linux, built-in 'say' on macOS.
+# kokoro: offline neural speech; install the optional runtime/model (README.md).
+# openai: richer AI voice; requires an API key and sends phrase text to OpenAI.
+backend = "local"
+# Blank: en-us/system (local), am_michael (Kokoro), or onyx (OpenAI).
+# Kokoro English examples: am_michael, bm_george, af_heart.
+name = ""
+# Words/minute for local. Kokoro speed = rate / 140; OpenAI = rate / 175.
+rate = 140
+# Only used with the OpenAI backend:
+model = "gpt-4o-mini-tts"
+# instructions = "A deep, booming fantasy arcade announcer. Urgent, theatrical, playful. Speak only the text."
+
+[effects]
+# Sample 08 medium: saturation, 300–3400 Hz, mono 8 kHz/8-bit PCM.
+# false restores clean speech (other effects below still apply).
+eight_bit_crunch = true
+# Natural pitch, no extra distortion or echo.
+# Lower values deepen/slow the voice. 1.0 = no pitch shift.
+pitch = 1.0
+# 0 = no bit-crushing; 1 = fully crunchy.
+grit = 0.0
+# Short dungeon echo; 0 = none.
+echo = 0.0
+volume = 0.7
+
+# Rules are exact, case-sensitive matches. All specified match fields must match.
+# First matching rule wins. Omit match fields to match any value.
+# agent = canonical kind (pi, claude, codex…), name = custom name/spoken label,
+# workspace = Herdr workspace label, pane = a specific pane ID (e.g. w7:p1).
+# A rule's templates or preset replaces global phrase selection.
+
+# [[rules]]
+# agent = "pi"
+# workspace = "my project"
+# templates = ["{agent} agent in {workspace} needs food badly!"]
+
+# [[rules]]
+# name = "reviewer"
+# preset = "snark"
+
+# [[rules]]
+# workspace = "quiet project"
+# mute = true
