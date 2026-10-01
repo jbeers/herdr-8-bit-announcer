@@ -40,7 +40,8 @@ class AnnouncerCheck(unittest.TestCase):
                 return result
 
         self.assertEqual(lookup(AGENT), AGENT)
-        self.assertEqual(lookup(dict(AGENT, focused=True)), dict(AGENT, focused=True))
+        self.assertEqual(lookup(dict(AGENT, focused=False)), dict(AGENT, focused=False))
+        self.assertIsNone(lookup(dict(AGENT, focused=True)))
         self.assertIsNone(lookup(dict(AGENT, completion_seq=None)))
         self.assertIsNone(lookup(dict(AGENT, state_change_seq=11)))
         self.assertIsNone(lookup(dict(AGENT, agent_status="working")))

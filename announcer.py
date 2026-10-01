@@ -177,7 +177,8 @@ def completed_agent(event):
     seq = agent.get("completion_seq")
     # 'done' is idle/unseen in Herdr. completion_seq distinguishes finished work
     # from startup idle and survives viewing the result; no Pi-specific hooks needed.
-    if (type(seq) is not int or seq <= 0 or agent.get("agent_status") not in ("idle", "done")
+    if (agent.get("focused") or type(seq) is not int or seq <= 0
+            or agent.get("agent_status") not in ("idle", "done")
             or seq != agent.get("state_change_seq")
             or agent.get("workspace_id") != data.get("workspace_id")
             or (data.get("agent") and data["agent"] != agent.get("agent"))):

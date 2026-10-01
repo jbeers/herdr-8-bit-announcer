@@ -229,6 +229,7 @@ OpenAI; cache misses incur charges. Cached clips require no additional API call.
 ## Behavior and development
 
 - Completions use `completion_seq`, not just idle; startup idle is ignored.
+  Announcements are suppressed while the completed agent is focused.
 - Duplicate hooks do not replay delivered completions. Failed audio is logged
   without marking delivery; a later hook can retry. No automatic retry worker.
 - Hooks resolve live state; a new task started before lookup can cause a stale
